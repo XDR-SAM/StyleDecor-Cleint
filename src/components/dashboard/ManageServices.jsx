@@ -4,7 +4,7 @@ import { servicesAPI, uploadAPI } from '../../util/api';
 import Loading from '../Loading';
 import Modal from '../Modal';
 import toast from 'react-hot-toast';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaUpload } from 'react-icons/fa';
 
 const ManageServices = () => {
   const queryClient = useQueryClient();
@@ -345,16 +345,26 @@ const ManageServices = () => {
             <label className="label">
               <span className="label-text">Service Image</span>
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              className="file-input file-input-bordered w-full"
-              onChange={handleImageUpload}
-              disabled={uploading}
-            />
-            {uploading && (
-              <span className="loading loading-spinner loading-sm mt-2"></span>
-            )}
+            <div className="flex flex-col gap-3">
+              <input
+                type="file"
+                accept="image/*"
+                id="service-image-upload"
+                className="hidden"
+                onChange={handleImageUpload}
+                disabled={uploading}
+              />
+              <label
+                htmlFor="service-image-upload"
+                className={`btn bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white border-0 w-full sm:w-auto ${uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <FaUpload className="mr-2" />
+                {uploading ? 'Uploading...' : 'Choose Service Image'}
+              </label>
+              {uploading && (
+                <span className="loading loading-spinner loading-sm text-orange-500"></span>
+              )}
+            </div>
             {formData.imageUrl && (
               <img
                 src={formData.imageUrl}

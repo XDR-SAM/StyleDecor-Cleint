@@ -187,21 +187,25 @@ const Register = () => {
                   Profile Image (Optional)
                 </span>
               </label>
-              <div className="relative">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="file-input file-input-bordered w-full input-modern rounded-xl"
-                      onChange={handleImageUpload}
-                      disabled={uploading}
-                    />
-                  </div>
-                  {uploading && (
-                    <span className="loading loading-spinner loading-md"></span>
-                  )}
+              <div className="flex flex-col gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="profile-image-upload"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                />
+                <label
+                  htmlFor="profile-image-upload"
+                  className={`btn bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white border-0 w-full sm:w-auto ${uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  <FaUpload className="mr-2" />
+                  {uploading ? 'Uploading...' : 'Choose Profile Image'}
                 </label>
+                {uploading && (
+                  <span className="loading loading-spinner loading-md text-orange-500"></span>
+                )}
               </div>
               {formData.profileImage && (
                 <motion.div
