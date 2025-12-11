@@ -5,10 +5,10 @@ import footerLogo from '../assets/StyleDecorFooterlogo.png';
 
 const Footer = () => {
   const socialLinks = [
-    { icon: FaFacebook, href: '#', label: 'Facebook' },
-    { icon: FaInstagram, href: '#', label: 'Instagram' },
-    { icon: FaTwitter, href: '#', label: 'Twitter' },
-    { icon: FaLinkedin, href: '#', label: 'LinkedIn' },
+    { icon: FaFacebook, href: 'https://www.facebook.com/mrBrownCastel', label: 'Facebook' },
+    { icon: FaInstagram, href: 'https://www.instagram.com/__al_sami', label: 'Instagram' },
+    { icon: FaTwitter, href: 'https://x.com/MrBrownCastel', label: 'Twitter' },
+    { icon: FaLinkedin, href: 'https://www.linkedin.com/in/sami-x', label: 'LinkedIn' },
   ];
 
   return (
@@ -70,7 +70,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
                 <FaPhone className="text-orange-500" />
-                <span>+880 1234 567890</span>
+                <span>+880 1570 200990</span>
               </li>
               <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
                 <FaMapMarkerAlt className="text-orange-500" />
@@ -90,15 +90,15 @@ const Footer = () => {
             <ul className="space-y-2 text-gray-600 dark:text-gray-400">
               <li className="flex items-center gap-2">
                 <FaClock className="text-orange-500" />
-                <span>Monday - Friday: 9:00 AM - 6:00 PM</span>
+                <span>Saturday - Thursday: 9:00 AM - 10:00 PM</span>
               </li>
               <li className="flex items-center gap-2">
                 <FaClock className="text-orange-500" />
-                <span>Saturday: 10:00 AM - 4:00 PM</span>
+                <span>Friday: 10:00 AM - 4:00 PM</span>
               </li>
               <li className="flex items-center gap-2">
                 <FaClock className="text-orange-500" />
-                <span>Sunday: Closed</span>
+                <span>Friday: open</span>
               </li>
             </ul>
           </motion.div>
@@ -107,7 +107,7 @@ const Footer = () => {
         <div className="border-t border-gray-200 dark:border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-600 dark:text-gray-400">
-              © {new Date().getFullYear()} StyleDecor. All rights reserved.
+              © {new Date().getFullYear()} StyleDecor. All rights reserved. BY SAMI
             </p>
             <div className="flex gap-4">
               {socialLinks.map((social, index) => {
