@@ -71,6 +71,12 @@ export const paymentsAPI = {
   getMyPayments: () => api.get('/api/payments/my-payments'),
 };
 
+// Users APIs
+export const usersAPI = {
+  getAll: (params) => api.get('/api/users', { params }),
+  toggleRole: (email, data) => api.patch(`/api/users/${email}/toggle-role`, data),
+};
+
 // Decorators APIs
 export const decoratorsAPI = {
   getAll: (params) => api.get('/api/decorators', { params }),

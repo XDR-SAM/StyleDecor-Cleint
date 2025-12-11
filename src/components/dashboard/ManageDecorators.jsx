@@ -1,36 +1,38 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { decoratorsAPI } from '../../util/api';
+import { usersAPI, decoratorsAPI } from '../../util/api';
 import Loading from '../Loading';
-import Modal from '../Modal';
 import toast from 'react-hot-toast';
-import { FaUserPlus, FaToggleOn, FaToggleOff } from 'react-icons/fa';
+import { FaSearch, FaUserShield, FaUser, FaToggleOn, FaToggleOff, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const ManageDecorators = () => {
   const queryClient = useQueryClient();
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const [expandedUser, setExpandedUser] = useState(null);
+  const [decoratorForm, setDecoratorForm] = useState({
     specialty: '',
     rating: '',
     experience: '',
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['decorators', 'all'],
-    queryFn: () => decoratorsAPI.getAll({}),
+    queryKey: ['users', 'all', { search: searchQuery, role: roleFilter, page }],
+    queryFn: () => usersAPI.getAll({ search: searchQuery, role: roleFilter, page, limit: 10 }),
   });
 
-  const makeDecoratorMutation = useMutation({
-    mutationFn: ({ email, data }) => decoratorsAPI.makeDecorator(email, data),
-    onSuccess: () => {
-      toast.success('User role updated to decorator');
+  const toggleRoleMutation = useMutation({
+    mutationFn: ({ email, data }) => usersAPI.toggleRole(email, data),
+    onSuccess: (response) => {
+      toast.success(response.data.message);
+      queryClient.invalidateQueries(['users']);
       queryClient.invalidateQueries(['decorators']);
-      setShowModal(false);
-      setFormData({ email: '', specialty: '', rating: '', experience: '' });
+      setExpandedUser(null);
+      setDecoratorForm({ specialty: '', rating: '', experience: '' });
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to update role');
+      toast.error(error.response?.data?.message || 'Failed to toggle role');
     },
   });
 
@@ -38,6 +40,7 @@ const ManageDecorators = () => {
     mutationFn: (email) => decoratorsAPI.toggleStatus(email),
     onSuccess: () => {
       toast.success('Decorator status updated');
+      queryClient.invalidateQueries(['users']);
       queryClient.invalidateQueries(['decorators']);
     },
     onError: (error) => {
@@ -45,18 +48,36 @@ const ManageDecorators = () => {
     },
   });
 
-  const decorators = data?.data?.decorators || [];
+  const users = data?.data?.users || [];
+  const pagination = data?.data?.pagination || {};
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    makeDecoratorMutation.mutate({
-      email: formData.email,
-      data: {
-        specialty: formData.specialty,
-        rating: parseFloat(formData.rating) || 0,
-        experience: formData.experience,
-      },
+  const handleToggleRole = (user) => {
+    if (user.role === 'decorator') {
+      // Demote to user
+      if (confirm(`Demote ${user.displayName} from decorator to user?`)) {
+        toggleRoleMutation.mutate({ email: user.email, data: {} });
+      }
+    } else {
+      // Show form to promote to decorator
+      setExpandedUser(user.email);
+    }
+  };
+
+  const handlePromoteToDecorator = (email) => {
+    toggleRoleMutation.mutate({
+      email,
+      data: decoratorForm,
     });
+  };
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    setPage(1); // Reset to first page on search
+  };
+
+  const handleRoleFilterChange = (newRole) => {
+    setRoleFilter(newRole);
+    setPage(1); // Reset to first page on filter change
   };
 
   if (isLoading) {
@@ -65,15 +86,51 @@ const ManageDecorators = () => {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Decorators</h2>
-        <button
-          className="btn btn-primary-modern w-full sm:w-auto"
-          onClick={() => setShowModal(true)}
-        >
-          <FaUserPlus className="mr-2" />
-          Make User Decorator
-        </button>
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Manage Users & Decorators</h2>
+        <p className="text-gray-600 dark:text-gray-400">Search users and toggle their roles between user and decorator</p>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="card-modern p-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Search */}
+          <div className="flex-1">
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                className="input input-bordered w-full pl-10"
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+            </div>
+          </div>
+
+          {/* Role Filter */}
+          <div className="flex gap-2">
+            <button
+              className={`btn btn-sm ${roleFilter === 'all' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleRoleFilterChange('all')}
+            >
+              All ({pagination.total || 0})
+            </button>
+            <button
+              className={`btn btn-sm ${roleFilter === 'user' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleRoleFilterChange('user')}
+            >
+              <FaUser className="mr-1" /> Users
+            </button>
+            <button
+              className={`btn btn-sm ${roleFilter === 'decorator' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => handleRoleFilterChange('decorator')}
+            >
+              <FaUserShield className="mr-1" /> Decorators
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Desktop Table View */}
@@ -81,8 +138,9 @@ const ManageDecorators = () => {
         <table className="table w-full">
           <thead>
             <tr>
-              <th>Name</th>
+              <th>User</th>
               <th>Email</th>
+              <th>Role</th>
               <th>Specialty</th>
               <th>Rating</th>
               <th>Experience</th>
@@ -91,58 +149,155 @@ const ManageDecorators = () => {
             </tr>
           </thead>
           <tbody>
-            {decorators.map((decorator) => (
-              <tr key={decorator._id}>
-                <td>
-                  <div className="flex items-center gap-3">
-                    <div className="avatar">
-                      <div className="w-10 rounded-full">
-                        {decorator.profileImage ? (
-                          <img
-                            src={decorator.profileImage}
-                            alt={decorator.displayName}
-                          />
-                        ) : (
-                          <div className="bg-accent text-white flex items-center justify-center">
-                            {decorator.displayName?.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+            {users.map((user) => (
+              <>
+                <tr key={user._id}>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div className="avatar">
+                        <div className="w-10 rounded-full">
+                          {user.profileImage ? (
+                            <img src={user.profileImage} alt={user.displayName} />
+                          ) : (
+                            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center">
+                              {user.displayName?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
                       </div>
+                      <span className="font-semibold text-gray-800 dark:text-gray-200">{user.displayName}</span>
                     </div>
-                    <span className="font-semibold">{decorator.displayName}</span>
-                  </div>
-                </td>
-                <td>{decorator.email}</td>
-                <td>{decorator.specialty || '-'}</td>
-                <td>{decorator.rating || 0}</td>
-                <td>{decorator.experience || '-'}</td>
-                <td>
-                  {decorator.isActive ? (
-                    <div className="badge badge-success">Active</div>
-                  ) : (
-                    <div className="badge badge-error">Inactive</div>
-                  )}
-                </td>
-                <td>
-                  <button
-                    className="btn btn-sm"
-                    onClick={() => toggleStatusMutation.mutate(decorator.email)}
-                    disabled={toggleStatusMutation.isPending}
-                  >
-                    {decorator.isActive ? (
-                      <>
-                        <FaToggleOn className="text-success" />
-                        Disable
-                      </>
-                    ) : (
-                      <>
-                        <FaToggleOff className="text-error" />
-                        Enable
-                      </>
+                  </td>
+                  <td className="text-gray-700 dark:text-gray-300">{user.email}</td>
+                  <td>
+                    <div className={`badge ${user.role === 'admin' ? 'badge-error' :
+                        user.role === 'decorator' ? 'badge-info' :
+                          'badge-ghost'
+                      }`}>
+                      {user.role}
+                    </div>
+                  </td>
+                  <td className="text-gray-700 dark:text-gray-300">{user.specialty || '-'}</td>
+                  <td className="text-gray-700 dark:text-gray-300">{user.rating || '-'}</td>
+                  <td className="text-gray-700 dark:text-gray-300">{user.experience || '-'}</td>
+                  <td>
+                    {user.role === 'decorator' && (
+                      user.isActive ? (
+                        <div className="badge badge-success">Active</div>
+                      ) : (
+                        <div className="badge badge-error">Inactive</div>
+                      )
                     )}
-                  </button>
-                </td>
-              </tr>
+                  </td>
+                  <td>
+                    <div className="flex gap-2">
+                      {user.role !== 'admin' && (
+                        <button
+                          className={`btn btn-sm ${user.role === 'decorator' ? 'btn-warning' : 'btn-info'}`}
+                          onClick={() => handleToggleRole(user)}
+                          disabled={toggleRoleMutation.isPending}
+                        >
+                          {user.role === 'decorator' ? (
+                            <>
+                              <FaUser className="mr-1" /> Make User
+                            </>
+                          ) : (
+                            <>
+                              <FaUserShield className="mr-1" /> Make Decorator
+                            </>
+                          )}
+                        </button>
+                      )}
+                      {user.role === 'decorator' && (
+                        <button
+                          className="btn btn-sm"
+                          onClick={() => toggleStatusMutation.mutate(user.email)}
+                          disabled={toggleStatusMutation.isPending}
+                        >
+                          {user.isActive ? (
+                            <>
+                              <FaToggleOn className="text-success" /> Disable
+                            </>
+                          ) : (
+                            <>
+                              <FaToggleOff className="text-error" /> Enable
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+                {/* Expanded Form Row */}
+                {expandedUser === user.email && (
+                  <tr>
+                    <td colSpan="8">
+                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Decorator Details</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text">Specialty</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="input input-bordered input-sm"
+                              value={decoratorForm.specialty}
+                              onChange={(e) => setDecoratorForm({ ...decoratorForm, specialty: e.target.value })}
+                              placeholder="e.g., Wedding Decoration"
+                            />
+                          </div>
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text">Rating</span>
+                            </label>
+                            <input
+                              type="number"
+                              className="input input-bordered input-sm"
+                              min="0"
+                              max="5"
+                              step="0.1"
+                              value={decoratorForm.rating}
+                              onChange={(e) => setDecoratorForm({ ...decoratorForm, rating: e.target.value })}
+                              placeholder="0-5"
+                            />
+                          </div>
+                          <div className="form-control">
+                            <label className="label">
+                              <span className="label-text">Experience</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="input input-bordered input-sm"
+                              value={decoratorForm.experience}
+                              onChange={(e) => setDecoratorForm({ ...decoratorForm, experience: e.target.value })}
+                              placeholder="e.g., 5 years"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handlePromoteToDecorator(user.email)}
+                            disabled={toggleRoleMutation.isPending}
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            className="btn btn-sm btn-ghost"
+                            onClick={() => {
+                              setExpandedUser(null);
+                              setDecoratorForm({ specialty: '', rating: '', experience: '' });
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
         </table>
@@ -150,162 +305,195 @@ const ManageDecorators = () => {
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
-        {decorators.map((decorator) => (
-          <div key={decorator._id} className="card-modern p-4">
+        {users.map((user) => (
+          <div key={user._id} className="card-modern p-4">
             <div className="flex gap-4 mb-3">
               <div className="avatar">
                 <div className="w-16 rounded-full ring-2 ring-orange-500">
-                  {decorator.profileImage ? (
-                    <img
-                      src={decorator.profileImage}
-                      alt={decorator.displayName}
-                    />
+                  {user.profileImage ? (
+                    <img src={user.profileImage} alt={user.displayName} />
                   ) : (
                     <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-xl font-bold">
-                      {decorator.displayName?.charAt(0).toUpperCase()}
+                      {user.displayName?.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 dark:text-white">{decorator.displayName}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{decorator.email}</p>
-                <div className="mt-1">
-                  {decorator.isActive ? (
-                    <div className="badge badge-success badge-sm">Active</div>
-                  ) : (
-                    <div className="badge badge-error badge-sm">Inactive</div>
+                <h3 className="font-bold text-gray-900 dark:text-white">{user.displayName}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{user.email}</p>
+                <div className="flex gap-2 mt-1">
+                  <div className={`badge badge-sm ${user.role === 'admin' ? 'badge-error' :
+                      user.role === 'decorator' ? 'badge-info' :
+                        'badge-ghost'
+                    }`}>
+                    {user.role}
+                  </div>
+                  {user.role === 'decorator' && (
+                    user.isActive ? (
+                      <div className="badge badge-success badge-sm">Active</div>
+                    ) : (
+                      <div className="badge badge-error badge-sm">Inactive</div>
+                    )
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Specialty:</span>
-                <p className="text-gray-800 dark:text-gray-200">{decorator.specialty || '-'}</p>
+            {user.role === 'decorator' && (
+              <div className="grid grid-cols-2 gap-2 text-sm mb-3 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Specialty:</span>
+                  <p className="text-gray-800 dark:text-gray-200">{user.specialty || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Rating:</span>
+                  <p className="text-gray-800 dark:text-gray-200">{user.rating || '-'}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-500 dark:text-gray-400">Experience:</span>
+                  <p className="text-gray-800 dark:text-gray-200">{user.experience || '-'}</p>
+                </div>
               </div>
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Rating:</span>
-                <p className="text-gray-800 dark:text-gray-200">{decorator.rating || 0}</p>
-              </div>
-              <div className="col-span-2">
-                <span className="text-gray-500 dark:text-gray-400">Experience:</span>
-                <p className="text-gray-800 dark:text-gray-200">{decorator.experience || '-'}</p>
-              </div>
-            </div>
+            )}
 
-            <button
-              className="btn btn-sm w-full"
-              onClick={() => toggleStatusMutation.mutate(decorator.email)}
-              disabled={toggleStatusMutation.isPending}
-            >
-              {decorator.isActive ? (
-                <>
-                  <FaToggleOn className="text-success mr-1" />
-                  Disable
-                </>
-              ) : (
-                <>
-                  <FaToggleOff className="text-error mr-1" />
-                  Enable
-                </>
+            {expandedUser === user.email && (
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg mb-3">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Decorator Details</h4>
+                <div className="space-y-2">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text text-xs">Specialty</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="input input-bordered input-sm w-full"
+                      value={decoratorForm.specialty}
+                      onChange={(e) => setDecoratorForm({ ...decoratorForm, specialty: e.target.value })}
+                      placeholder="e.g., Wedding Decoration"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text text-xs">Rating</span>
+                      </label>
+                      <input
+                        type="number"
+                        className="input input-bordered input-sm w-full"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={decoratorForm.rating}
+                        onChange={(e) => setDecoratorForm({ ...decoratorForm, rating: e.target.value })}
+                        placeholder="0-5"
+                      />
+                    </div>
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text text-xs">Experience</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="input input-bordered input-sm w-full"
+                        value={decoratorForm.experience}
+                        onChange={(e) => setDecoratorForm({ ...decoratorForm, experience: e.target.value })}
+                        placeholder="e.g., 5 years"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    className="btn btn-sm btn-primary flex-1"
+                    onClick={() => handlePromoteToDecorator(user.email)}
+                    disabled={toggleRoleMutation.isPending}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    className="btn btn-sm btn-ghost flex-1"
+                    onClick={() => {
+                      setExpandedUser(null);
+                      setDecoratorForm({ specialty: '', rating: '', experience: '' });
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              {user.role !== 'admin' && (
+                <button
+                  className={`btn btn-sm flex-1 ${user.role === 'decorator' ? 'btn-warning' : 'btn-info'}`}
+                  onClick={() => handleToggleRole(user)}
+                  disabled={toggleRoleMutation.isPending}
+                >
+                  {user.role === 'decorator' ? (
+                    <>
+                      <FaUser className="mr-1" /> Make User
+                    </>
+                  ) : (
+                    <>
+                      <FaUserShield className="mr-1" /> Make Decorator
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+              {user.role === 'decorator' && (
+                <button
+                  className="btn btn-sm flex-1"
+                  onClick={() => toggleStatusMutation.mutate(user.email)}
+                  disabled={toggleStatusMutation.isPending}
+                >
+                  {user.isActive ? (
+                    <>
+                      <FaToggleOn className="text-success mr-1" /> Disable
+                    </>
+                  ) : (
+                    <>
+                      <FaToggleOff className="text-error mr-1" /> Enable
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setFormData({ email: '', specialty: '', rating: '', experience: '' });
-        }}
-        title="Make User Decorator"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">User Email *</span>
-            </label>
-            <input
-              type="email"
-              className="input input-bordered"
-              required
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
-          </div>
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <button
+            className="btn btn-sm btn-outline"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >
+            <FaChevronLeft />
+          </button>
+          <span className="text-gray-800 dark:text-gray-200 px-4">
+            Page {page} of {pagination.totalPages}
+          </span>
+          <button
+            className="btn btn-sm btn-outline"
+            disabled={page === pagination.totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            <FaChevronRight />
+          </button>
+        </div>
+      )}
 
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Specialty</span>
-            </label>
-            <input
-              type="text"
-              className="input input-bordered"
-              value={formData.specialty}
-              onChange={(e) =>
-                setFormData({ ...formData, specialty: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Rating</span>
-              </label>
-              <input
-                type="number"
-                className="input input-bordered"
-                min="0"
-                max="5"
-                step="0.1"
-                value={formData.rating}
-                onChange={(e) =>
-                  setFormData({ ...formData, rating: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Experience</span>
-              </label>
-              <input
-                type="text"
-                className="input input-bordered"
-                placeholder="e.g., 5 years"
-                value={formData.experience}
-                onChange={(e) =>
-                  setFormData({ ...formData, experience: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="form-control mt-6">
-            <button
-              type="submit"
-              className="btn btn-primary-modern"
-              disabled={makeDecoratorMutation.isPending}
-            >
-              {makeDecoratorMutation.isPending ? (
-                <span className="loading loading-spinner"></span>
-              ) : (
-                'Make Decorator'
-              )}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      {users.length === 0 && (
+        <div className="text-center py-12 card-modern">
+          <p className="text-xl text-gray-500 dark:text-gray-400">No users found</p>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ManageDecorators;
-
