@@ -31,7 +31,7 @@ const ServiceCoverageMap = () => {
         center={center}
         zoom={7}
         style={{ height: '100%', width: '100%' }}
-        className="rounded-lg"
+        className="rounded-lg z-0"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
