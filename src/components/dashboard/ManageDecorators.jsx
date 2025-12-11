@@ -122,7 +122,7 @@ const ManageDecorators = () => {
           </div>
 
           {/* Role Filter */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               className={`btn btn-sm ${roleFilter === 'all' ? 'btn-primary' : 'btn-outline'}`}
               onClick={() => handleRoleFilterChange('all')}
@@ -169,9 +169,9 @@ const ManageDecorators = () => {
                       <div className="avatar">
                         <div className="w-10 rounded-full">
                           {user.profileImage ? (
-                            <img src={user.profileImage} alt={user.displayName} />
+                            <img src={user.profileImage} alt={user.displayName} className="w-full h-full object-cover object-center" />
                           ) : (
-                            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center">
+                            <div className="w-full h-full bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center">
                               {user.displayName?.charAt(0).toUpperCase()}
                             </div>
                           )}
@@ -244,16 +244,16 @@ const ManageDecorators = () => {
                 {expandedUser === user.email && (
                   <tr>
                     <td colSpan="8">
-                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Decorator Details</h4>
-                        <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Decorator Details</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="form-control">
                             <label className="label">
                               <span className="label-text">Specialty</span>
                             </label>
                             <input
                               type="text"
-                              className="input input-bordered input-sm"
+                              className="input input-bordered input-sm w-full"
                               value={decoratorForm.specialty}
                               onChange={(e) => setDecoratorForm({ ...decoratorForm, specialty: e.target.value })}
                               placeholder="e.g., Wedding Decoration"
@@ -265,7 +265,7 @@ const ManageDecorators = () => {
                             </label>
                             <input
                               type="number"
-                              className="input input-bordered input-sm"
+                              className="input input-bordered input-sm w-full"
                               min="0"
                               max="5"
                               step="0.1"
@@ -280,14 +280,14 @@ const ManageDecorators = () => {
                             </label>
                             <input
                               type="text"
-                              className="input input-bordered input-sm"
+                              className="input input-bordered input-sm w-full"
                               value={decoratorForm.experience}
                               onChange={(e) => setDecoratorForm({ ...decoratorForm, experience: e.target.value })}
                               placeholder="e.g., 5 years"
                             />
                           </div>
                         </div>
-                        <div className="flex gap-2 mt-4">
+                        <div className="flex gap-3 mt-6">
                           <button
                             className="btn btn-sm btn-primary"
                             onClick={() => handlePromoteToDecorator(user.email)}
@@ -323,9 +323,9 @@ const ManageDecorators = () => {
               <div className="avatar">
                 <div className="w-16 rounded-full ring-2 ring-orange-500">
                   {user.profileImage ? (
-                    <img src={user.profileImage} alt={user.displayName} />
+                    <img src={user.profileImage} alt={user.displayName} className="w-full h-full object-cover object-center" />
                   ) : (
-                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-xl font-bold">
+                    <div className="w-full h-full bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-xl font-bold">
                       {user.displayName?.charAt(0).toUpperCase()}
                     </div>
                   )}

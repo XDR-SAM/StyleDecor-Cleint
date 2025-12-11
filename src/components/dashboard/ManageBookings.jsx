@@ -71,7 +71,7 @@ const ManageBookings = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Bookings</h2>
         <select
-          className="select select-bordered"
+          className="select select-bordered w-full sm:w-auto min-w-[200px]"
           value={statusFilter}
           onChange={(e) => {
             setStatusFilter(e.target.value);
@@ -137,7 +137,7 @@ const ManageBookings = () => {
                   <div className="flex flex-col gap-2">
                     {booking.isPaid && !booking.assignedDecorator && (
                       <select
-                        className="select select-sm select-bordered"
+                        className="select select-sm select-bordered min-w-[180px]"
                         onChange={(e) => {
                           if (e.target.value) {
                             assignDecoratorMutation.mutate({
@@ -160,7 +160,7 @@ const ManageBookings = () => {
                     {booking.status !== 'completed' &&
                       booking.status !== 'cancelled' && (
                         <select
-                          className="select select-sm select-bordered"
+                          className="select select-sm select-bordered min-w-[180px]"
                           value={booking.status}
                           onChange={(e) => {
                             updateStatusMutation.mutate({

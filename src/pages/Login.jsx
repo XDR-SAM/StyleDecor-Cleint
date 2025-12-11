@@ -61,7 +61,7 @@ const Login = () => {
             <p className="text-gray-600 dark:text-gray-400">Sign in to your account</p>
           </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-7">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}

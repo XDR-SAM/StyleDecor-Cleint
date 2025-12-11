@@ -257,14 +257,14 @@ const ManageServices = () => {
         }}
         title={editingService ? 'Edit Service' : 'Add Service'}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="form-control">
             <label className="label">
               <span className="label-text">Service Name *</span>
             </label>
             <input
               type="text"
-              className="input input-bordered"
+              className="input input-bordered w-full"
               required
               value={formData.service_name}
               onChange={(e) =>
@@ -273,14 +273,14 @@ const ManageServices = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Cost (BDT) *</span>
               </label>
               <input
                 type="number"
-                className="input input-bordered"
+                className="input input-bordered w-full"
                 required
                 value={formData.cost}
                 onChange={(e) =>
@@ -295,7 +295,7 @@ const ManageServices = () => {
               </label>
               <input
                 type="text"
-                className="input input-bordered"
+                className="input input-bordered w-full"
                 placeholder="e.g., per sqft, per floor"
                 required
                 value={formData.unit}
@@ -311,7 +311,7 @@ const ManageServices = () => {
               <span className="label-text">Category *</span>
             </label>
             <select
-              className="select select-bordered"
+              className="select select-bordered w-full"
               required
               value={formData.service_category}
               onChange={(e) =>
@@ -332,7 +332,7 @@ const ManageServices = () => {
               <span className="label-text">Description *</span>
             </label>
             <textarea
-              className="textarea textarea-bordered"
+              className="textarea textarea-bordered w-full"
               required
               value={formData.description}
               onChange={(e) =>
@@ -348,7 +348,7 @@ const ManageServices = () => {
             <input
               type="file"
               accept="image/*"
-              className="file-input file-input-bordered"
+              className="file-input file-input-bordered w-full"
               onChange={handleImageUpload}
               disabled={uploading}
             />
@@ -359,15 +359,15 @@ const ManageServices = () => {
               <img
                 src={formData.imageUrl}
                 alt="Preview"
-                className="w-32 h-32 object-cover rounded mt-2"
+                className="w-32 h-32 object-cover rounded mt-3"
               />
             )}
           </div>
 
-          <div className="form-control mt-6">
+          <div className="form-control mt-8">
             <button
               type="submit"
-              className="btn btn-primary-modern"
+              className="btn btn-primary-modern w-full"
               disabled={createMutation.isPending || updateMutation.isPending}
             >
               {createMutation.isPending || updateMutation.isPending ? (

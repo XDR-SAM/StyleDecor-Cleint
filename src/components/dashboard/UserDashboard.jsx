@@ -72,11 +72,11 @@ const UserDashboard = () => {
       >
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="avatar">
-            <div className="w-24 rounded-full ring-4 ring-gradient-to-r ring-orange-500 ring-offset-2 dark:ring-offset-gray-900">
+            <div className="w-24 rounded-full ring-4 ring-orange-500 ring-offset-2 dark:ring-offset-gray-900">
               {user.profileImage ? (
-                <img src={user.profileImage} alt={user.displayName} />
+                <img src={user.profileImage} alt={user.displayName} className="w-full h-full object-cover object-center" />
               ) : (
-                <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-3xl font-bold">
+                <div className="w-full h-full bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-3xl font-bold">
                   {user.displayName?.charAt(0).toUpperCase()}
                 </div>
               )}

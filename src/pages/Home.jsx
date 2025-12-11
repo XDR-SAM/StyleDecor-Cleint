@@ -248,11 +248,11 @@ const Home = () => {
                 >
                   <div className="card-body items-center text-center bg-white dark:bg-gray-800">
                     <div className="avatar mb-4">
-                      <div className="w-24 rounded-full ring-4 ring-gradient-to-r ring-orange-500 ring-offset-2 dark:ring-offset-gray-800">
+                      <div className="w-24 rounded-full ring-4 ring-orange-500 ring-offset-2 dark:ring-offset-gray-800">
                         {decorator.profileImage ? (
-                          <img src={decorator.profileImage} alt={decorator.displayName} />
+                          <img src={decorator.profileImage} alt={decorator.displayName} className="w-full h-full object-cover object-center" />
                         ) : (
-                          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-3xl font-bold">
+                          <div className="w-full h-full bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center text-3xl font-bold">
                             {decorator.displayName?.charAt(0).toUpperCase()}
                           </div>
                         )}

@@ -96,7 +96,7 @@ const Register = () => {
             <p className="text-gray-600 dark:text-gray-400">Join us and start decorating</p>
           </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}

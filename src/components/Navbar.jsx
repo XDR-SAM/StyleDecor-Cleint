@@ -96,16 +96,18 @@ const Navbar = () => {
                     role="button"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="btn btn-ghost btn-circle avatar"
+                    className="cursor-pointer"
                   >
-                    <div className="w-10 rounded-full ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-gray-900">
-                      {user.profileImage ? (
-                        <img src={user.profileImage} alt={user.displayName} />
-                      ) : (
-                        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center font-bold">
-                          {user.displayName?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                    <div className="avatar">
+                      <div className="w-10 h-10 rounded-full ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-gray-900 overflow-hidden">
+                        {user.profileImage ? (
+                          <img src={user.profileImage} alt={user.displayName} className="w-full h-full object-cover object-center" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-r from-orange-500 to-red-500 text-white flex items-center justify-center font-bold text-sm">
+                            {user.displayName?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                   <ul
