@@ -77,7 +77,7 @@ const AdminDashboard = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
-        className="flex flex-wrap gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-100 dark:bg-gray-800 p-2 rounded-xl"
       >
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -86,11 +86,10 @@ const AdminDashboard = () => {
               key={tab.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`flex-1 min-w-[150px] py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                activeTab === tab.id
+              className={`py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === tab.id
                   ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
+                }`}
               onClick={() => setActiveTab(tab.id)}
             >
               <Icon />

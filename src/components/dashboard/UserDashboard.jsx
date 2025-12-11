@@ -97,33 +97,31 @@ const UserDashboard = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl"
+        className="grid grid-cols-2 gap-2 bg-gray-100 dark:bg-gray-800 p-2 rounded-xl"
       >
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-            activeTab === 'bookings'
-              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
+          className={`py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'bookings'
+            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
           onClick={() => setActiveTab('bookings')}
         >
           <FaBook />
-          My Bookings
+          <span className="hidden sm:inline">My Bookings</span>
         </motion.button>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-            activeTab === 'payments'
-              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
+          className={`py-3 px-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'payments'
+            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
           onClick={() => setActiveTab('payments')}
         >
           <FaCreditCard />
-          Payment History
+          <span className="hidden sm:inline">Payment History</span>
         </motion.button>
       </motion.div>
 
@@ -262,44 +260,86 @@ const UserDashboard = () => {
               <p className="text-xl text-gray-500 dark:text-gray-400">No payment history</p>
             </motion.div>
           ) : (
-            <div className="overflow-x-auto">
-              <div className="card-modern p-6">
-                <table className="table w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-gray-700 dark:text-gray-300 font-semibold">Date</th>
-                      <th className="text-gray-700 dark:text-gray-300 font-semibold">Amount</th>
-                      <th className="text-gray-700 dark:text-gray-300 font-semibold">Status</th>
-                      <th className="text-gray-700 dark:text-gray-300 font-semibold">Payment ID</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payments.map((payment, index) => (
-                      <motion.tr
-                        key={payment._id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <td className="text-gray-700 dark:text-gray-300">
-                          {new Date(payment.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="font-bold text-gradient-accent text-lg">৳{payment.amount}</td>
-                        <td>
-                          <span className="badge badge-success badge-lg">
-                            {payment.status}
-                          </span>
-                        </td>
-                        <td className="text-sm text-gray-500 dark:text-gray-400 font-mono">
-                          {payment.paymentIntentId?.substring(0, 20)}...
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <div className="card-modern p-6">
+                  <table className="table w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-700">
+                        <th className="text-gray-700 dark:text-gray-300 font-semibold">Date</th>
+                        <th className="text-gray-700 dark:text-gray-300 font-semibold">Amount</th>
+                        <th className="text-gray-700 dark:text-gray-300 font-semibold">Status</th>
+                        <th className="text-gray-700 dark:text-gray-300 font-semibold">Payment ID</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {payments.map((payment, index) => (
+                        <motion.tr
+                          key={payment._id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                          className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <td className="text-gray-700 dark:text-gray-300">
+                            {new Date(payment.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="font-bold text-gradient-accent text-lg">৳{payment.amount}</td>
+                          <td>
+                            <span className="badge badge-success badge-lg">
+                              {payment.status}
+                            </span>
+                          </td>
+                          <td className="text-sm text-gray-500 dark:text-gray-400 font-mono">
+                            {payment.paymentIntentId?.substring(0, 20)}...
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {payments.map((payment, index) => (
+                  <motion.div
+                    key={payment._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="card-modern p-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Date</p>
+                          <p className="text-gray-800 dark:text-gray-200 font-medium">
+                            {new Date(payment.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className="badge badge-success">
+                          {payment.status}
+                        </span>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Amount</p>
+                        <p className="font-bold text-gradient-accent text-2xl">৳{payment.amount}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Payment ID</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-mono break-all">
+                          {payment.paymentIntentId}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </>
           )}
         </motion.div>
       )}

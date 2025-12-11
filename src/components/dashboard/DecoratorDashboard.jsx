@@ -134,33 +134,56 @@ const DecoratorDashboard = () => {
 
               {/* Status Progress */}
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                   <FaClipboardList className="text-orange-500" />
                   Status Progress
                 </p>
-                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+
+                {/* Desktop: Horizontal Layout */}
+                <div className="hidden sm:flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
                   {statusFlow.map((status, index) => {
                     const isActive = statusFlow.indexOf(booking.status) >= index;
                     const isCurrent = booking.status === status;
                     return (
-                      <div key={status} className="flex items-center">
+                      <div key={status} className="flex items-center flex-shrink-0">
                         <div
-                          className={`badge ${
-                            isActive
+                          className={`badge whitespace-nowrap ${isActive
                               ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-0'
                               : 'badge-ghost'
-                          } ${isCurrent ? 'badge-lg shadow-lg' : ''}`}
+                            } ${isCurrent ? 'badge-lg shadow-lg' : ''}`}
                         >
                           {status.replace('-', ' ')}
                         </div>
                         {index < statusFlow.length - 1 && (
                           <div
-                            className={`w-8 h-1 mx-2 rounded ${
-                              isActive
+                            className={`w-8 h-1 mx-2 rounded flex-shrink-0 ${isActive
                                 ? 'bg-gradient-to-r from-orange-500 to-red-500'
                                 : 'bg-gray-300 dark:bg-gray-600'
-                            }`}
+                              }`}
                           />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile: Vertical Layout */}
+                <div className="sm:hidden space-y-2">
+                  {statusFlow.map((status, index) => {
+                    const isActive = statusFlow.indexOf(booking.status) >= index;
+                    const isCurrent = booking.status === status;
+                    return (
+                      <div key={status} className="flex items-center gap-3">
+                        <div
+                          className={`badge whitespace-nowrap flex-shrink-0 ${isActive
+                              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-0'
+                              : 'badge-ghost'
+                            } ${isCurrent ? 'badge-lg shadow-lg' : 'badge-sm'}`}
+                        >
+                          {status.replace('-', ' ')}
+                        </div>
+                        {isCurrent && (
+                          <span className="text-xs text-orange-500 font-semibold">← Current</span>
                         )}
                       </div>
                     );

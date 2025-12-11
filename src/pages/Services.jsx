@@ -169,7 +169,7 @@ const Services = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
             {services.map((service, index) => (
               <motion.div
                 key={service._id}
@@ -183,31 +183,32 @@ const Services = () => {
                   <img
                     src={service.imageUrl || 'https://via.placeholder.com/400x250'}
                     alt={service.service_name}
-                    className="h-48 w-full object-cover transition-transform duration-300 hover:scale-110"
+                    className="h-40 sm:h-48 w-full object-cover transition-transform duration-300 hover:scale-110"
                   />
-                  <div className="absolute top-4 right-4">
-                    <span className="badge badge-lg bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                    <span className="badge badge-sm sm:badge-lg bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">
                       {service.service_category}
                     </span>
                   </div>
                 </figure>
-                <div className="card-body bg-white dark:bg-gray-800">
-                  <h2 className="card-title text-gray-900 dark:text-white text-lg">{service.service_name}</h2>
-                  <p className="text-gray-600 dark:text-gray-300 line-clamp-2 text-sm">{service.description}</p>
-                  <div className="card-actions justify-between items-center mt-4">
+                <div className="card-body bg-white dark:bg-gray-800 p-3 sm:p-4">
+                  <h2 className="card-title text-gray-900 dark:text-white text-base sm:text-lg line-clamp-1">{service.service_name}</h2>
+                  <p className="text-gray-600 dark:text-gray-300 line-clamp-2 text-xs sm:text-sm">{service.description}</p>
+                  <div className="card-actions flex-col sm:flex-row justify-between items-start sm:items-center mt-3 sm:mt-4 gap-2">
                     <div>
-                      <span className="text-xl font-bold text-gradient-accent">
+                      <span className="text-lg sm:text-xl font-bold text-gradient-accent">
                         ৳{service.cost}
                       </span>
-                      <span className="text-gray-500 dark:text-gray-400 text-sm">/{service.unit}</span>
+                      <span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">/{service.unit}</span>
                     </div>
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      className="w-full sm:w-auto"
                     >
                       <Link
                         to={`/services/${service._id}`}
-                        className="btn btn-sm bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 hover:from-orange-600 hover:to-red-600"
+                        className="btn btn-sm w-full sm:w-auto bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 hover:from-orange-600 hover:to-red-600"
                       >
                         View Details
                       </Link>
