@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersAPI, decoratorsAPI } from '../../util/api';
 import Loading from '../Loading';
@@ -8,6 +8,7 @@ import { FaSearch, FaUserShield, FaUser, FaToggleOn, FaToggleOff, FaChevronLeft,
 const ManageDecorators = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [expandedUser, setExpandedUser] = useState(null);
@@ -17,9 +18,19 @@ const ManageDecorators = () => {
     experience: '',
   });
 
+  // Debounce search query to prevent re-rendering on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ['users', 'all', { search: searchQuery, role: roleFilter, page }],
-    queryFn: () => usersAPI.getAll({ search: searchQuery, role: roleFilter, page, limit: 10 }),
+    queryKey: ['users', 'all', { search: debouncedSearchQuery, role: roleFilter, page }],
+    queryFn: () => usersAPI.getAll({ search: debouncedSearchQuery, role: roleFilter, page, limit: 10 }),
+    placeholderData: (previousData) => previousData,
   });
 
   const toggleRoleMutation = useMutation({
@@ -80,7 +91,8 @@ const ManageDecorators = () => {
     setPage(1); // Reset to first page on filter change
   };
 
-  if (isLoading) {
+  // Only show loading on initial load, not on subsequent searches
+  if (isLoading && !data) {
     return <Loading />;
   }
 
@@ -171,8 +183,8 @@ const ManageDecorators = () => {
                   <td className="text-gray-700 dark:text-gray-300">{user.email}</td>
                   <td>
                     <div className={`badge ${user.role === 'admin' ? 'badge-error' :
-                        user.role === 'decorator' ? 'badge-info' :
-                          'badge-ghost'
+                      user.role === 'decorator' ? 'badge-info' :
+                        'badge-ghost'
                       }`}>
                       {user.role}
                     </div>
@@ -324,8 +336,8 @@ const ManageDecorators = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-300">{user.email}</p>
                 <div className="flex gap-2 mt-1">
                   <div className={`badge badge-sm ${user.role === 'admin' ? 'badge-error' :
-                      user.role === 'decorator' ? 'badge-info' :
-                        'badge-ghost'
+                    user.role === 'decorator' ? 'badge-info' :
+                      'badge-ghost'
                     }`}>
                     {user.role}
                   </div>
