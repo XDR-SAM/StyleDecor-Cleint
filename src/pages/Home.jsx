@@ -3,11 +3,6 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { servicesAPI, decoratorsAPI } from '../util/api';
 import Loading from '../components/Loading';
-import heroSticker from '../assets/herosticker.png';
-import heroSticker1 from '../assets/herosticker1.png';
-import heroSticker2 from '../assets/herosticker2.png';
-import heroSticker3 from '../assets/herosticker3.png';
-import heroSticker4 from '../assets/herosticker4.png';
 import { FaStar } from 'react-icons/fa';
 import ServiceCoverageMap from '../components/ServiceCoverageMap';
 
@@ -25,106 +20,333 @@ const Home = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900">
+        {/* Animated Background Gradient Orbs */}
+        <motion.div
+          className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-orange-400/40 to-red-400/40 dark:from-orange-500/30 dark:to-red-500/30 rounded-full blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-purple-400/40 to-pink-400/40 dark:from-purple-500/30 dark:to-pink-500/30 rounded-full blur-3xl"
+          animate={{
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 w-96 h-96 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 dark:from-blue-500/20 dark:to-cyan-500/20 rounded-full blur-3xl"
+          animate={{
+            x: [-100, 100, -100],
+            y: [-100, 100, -100],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        {/* Floating Geometric Shapes */}
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-400 dark:to-red-400 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, Math.random() * 20 - 10, 0],
+              scale: [1, 1.5, 1],
+              opacity: [0.4, 0.8, 0.4],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 2,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+
+        {/* Larger Floating Shapes */}
+        <motion.div
+          className="absolute top-20 left-20 w-20 h-20 border-2 border-orange-500/50 dark:border-orange-400/40 rounded-lg"
+          animate={{
+            rotate: [0, 360],
+            y: [0, -50, 0],
+            x: [0, 30, 0],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-32 right-32 w-16 h-16 border-2 border-purple-500/50 dark:border-purple-400/40 rounded-full"
+          animate={{
+            scale: [1, 1.3, 1],
+            y: [0, 40, 0],
+            x: [0, -20, 0],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute top-1/3 right-1/4 w-12 h-12 bg-gradient-to-r from-pink-500/30 to-purple-500/30 dark:from-pink-500/20 dark:to-purple-500/20 rotate-45"
+          animate={{
+            rotate: [45, 405],
+            y: [0, -60, 0],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-20 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Animated Title */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="space-y-6"
+              className="mb-8"
             >
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white">
-                Transform Your Space with
-                <span className="text-gradient-accent block">StyleDecor</span>
-              </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300">
-                Professional decoration services for homes, weddings, and special events.
-                Book your consultation or service online today!
-              </p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <motion.h1
+                className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1 }}
               >
-                <Link
-                  to="/services"
-                  className="inline-block px-8 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Book Decoration Service
-                </Link>
+                {['Transform', 'Your', 'Space'].map((word, i) => (
+                  <motion.span
+                    key={i}
+                    className="inline-block mr-4 bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 dark:from-orange-400 dark:via-red-400 dark:to-pink-400 bg-clip-text text-transparent"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.8,
+                      delay: i * 0.2,
+                      ease: "easeOut",
+                    }}
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </motion.h1>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+              >
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold">
+                  <motion.span
+                    className="inline-block bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 dark:from-purple-400 dark:via-pink-400 dark:to-red-400 bg-clip-text text-transparent"
+                    animate={{
+                      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  >
+                    with StyleDecor
+                  </motion.span>
+                </h2>
               </motion.div>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
+            {/* Animated Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              <div className="relative z-10">
-                <img src={heroSticker} alt="Decoration" className="w-full max-w-md mx-auto" />
-              </div>
-
-              {/* Floating Stickers */}
-              <motion.img
-                src={heroSticker1}
-                alt=""
-                className="absolute top-10 left-10 w-20 h-20"
+              Professional decoration services for homes, weddings, and special events.
+              <motion.span
+                className="block mt-2 text-orange-600 dark:text-orange-400 font-semibold"
                 animate={{
-                  y: [0, -20, 0],
-                  rotate: [0, 10, 0],
+                  opacity: [0.6, 1, 0.6],
                 }}
                 transition={{
                   duration: 3,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-              />
-              <motion.img
-                src={heroSticker2}
-                alt=""
-                className="absolute top-20 right-20 w-16 h-16"
-                animate={{
-                  y: [0, 15, 0],
-                  rotate: [0, -10, 0],
-                }}
-                transition={{
-                  duration: 2.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.img
-                src={heroSticker3}
-                alt=""
-                className="absolute bottom-20 left-20 w-14 h-14"
-                animate={{
-                  y: [0, -15, 0],
-                  rotate: [0, 15, 0],
-                }}
-                transition={{
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.img
-                src={heroSticker4}
-                alt=""
-                className="absolute bottom-10 right-10 w-18 h-18"
-                animate={{
-                  y: [0, 20, 0],
-                  rotate: [0, -15, 0],
-                }}
-                transition={{
-                  duration: 2.8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+              >
+                Book your consultation or service online today!
+              </motion.span>
+            </motion.p>
+
+            {/* Animated CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1 }}
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            >
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative group"
+              >
+                <motion.div
+                  className="absolute -inset-1 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-2xl blur opacity-75 group-hover:opacity-100"
+                  animate={{
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                />
+                <Link
+                  to="/services"
+                  className="relative inline-block px-10 py-5 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg shadow-2xl"
+                >
+                  <motion.span
+                    animate={{
+                      textShadow: [
+                        '0 0 10px rgba(255,255,255,0.5)',
+                        '0 0 20px rgba(255,255,255,0.8)',
+                        '0 0 10px rgba(255,255,255,0.5)',
+                      ],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    Book Decoration Service
+                  </motion.span>
+                </Link>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  to="/services"
+                  className="inline-block px-10 py-5 rounded-xl border-2 border-purple-600 dark:border-purple-400 text-purple-700 dark:text-purple-400 font-bold text-lg hover:bg-purple-600/10 dark:hover:bg-purple-400/10 transition-all duration-300 backdrop-blur-sm"
+                >
+                  Explore Services
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            {/* Floating Stats/Features */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20"
+            >
+              {[
+                { number: '500+', label: 'Happy Clients', delay: 0 },
+                { number: '1000+', label: 'Projects Done', delay: 0.2 },
+                { number: '50+', label: 'Expert Decorators', delay: 0.4 },
+              ].map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.2 + stat.delay }}
+                  whileHover={{ scale: 1.1, y: -10 }}
+                  className="relative group"
+                >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-orange-500/30 to-purple-500/30 dark:from-orange-500/20 dark:to-purple-500/20 rounded-2xl blur-xl"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.4, 0.7, 0.4],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      delay: i * 0.5,
+                      ease: "easeInOut",
+                    }}
+                  />
+                  <div className="relative bg-white/60 dark:bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-orange-200/50 dark:border-white/10 shadow-lg">
+                    <motion.h3
+                      className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 dark:from-orange-400 dark:to-pink-400 bg-clip-text text-transparent"
+                      animate={{
+                        scale: [1, 1.05, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: i * 0.3,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      {stat.number}
+                    </motion.h3>
+                    <p className="text-gray-700 dark:text-gray-300 mt-2 font-medium">{stat.label}</p>
+                  </div>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </div>
+
+        {/* Scroll Indicator */}
+        <motion.div
+          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+          animate={{
+            y: [0, 10, 0],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <div className="w-6 h-10 border-2 border-orange-500/60 dark:border-orange-400/50 rounded-full flex justify-center">
+            <motion.div
+              className="w-1.5 h-1.5 bg-orange-600 dark:bg-orange-400 rounded-full mt-2"
+              animate={{
+                y: [0, 16, 0],
+                opacity: [1, 0.3, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </div>
+        </motion.div>
       </section>
 
       {/* Services Section */}
