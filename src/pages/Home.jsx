@@ -8,8 +8,8 @@ import ServiceCoverageMap from '../components/ServiceCoverageMap';
 
 const Home = () => {
   const { data: servicesData, isLoading: servicesLoading } = useQuery({
-    queryKey: ['services', { limit: 6 }],
-    queryFn: () => servicesAPI.getAll({ limit: 6 }),
+    queryKey: ['services', { limit: 8 }],
+    queryFn: () => servicesAPI.getAll({ limit: 8 }),
   });
 
   const { data: decoratorsData, isLoading: decoratorsLoading } = useQuery({
@@ -367,7 +367,7 @@ const Home = () => {
             <Loading />
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {servicesData?.data?.services?.slice(0, 6).map((service, index) => (
+              {servicesData?.data?.services?.slice(0, 8).map((service, index) => (
                 <motion.div
                   key={service._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -379,7 +379,7 @@ const Home = () => {
                 >
                   <figure className="relative overflow-hidden">
                     <img
-                      src={service.imageUrl || 'https://via.placeholder.com/400x250'}
+                      src={service.imageUrl || 'https://www.svgrepo.com/show/508699/landscape-placeholder.svg'}
                       alt={service.service_name}
                       className="h-40 sm:h-48 w-full object-cover transition-transform duration-300 hover:scale-110"
                     />
