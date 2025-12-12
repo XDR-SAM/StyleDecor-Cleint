@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../util/api';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext(null);
 
@@ -23,64 +23,134 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (token && storedUser) {
-      // Verify token is still valid
-      authAPI.getMe()
-        .then((res) => {
-          setUser(res.data);
-          localStorage.setItem('user', JSON.stringify(res.data));
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          setUser(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    // Listen to Firebase auth state changes
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          // User is signed in with Firebase (Google login)
+          const token = localStorage.getItem('token');
+
+          if (token) {
+            // Verify existing token is still valid
+            try {
+              const res = await authAPI.getMe();
+              setUser(res.data);
+              localStorage.setItem('user', JSON.stringify(res.data));
+            } catch (error) {
+              // Token expired or invalid, get fresh token from Firebase
+              console.log('Token expired, refreshing with Firebase...');
+              const idToken = await firebaseUser.getIdToken(true); // Force refresh
+
+              // Re-authenticate with backend using Firebase token
+              try {
+                const response = await authAPI.login({
+                  email: firebaseUser.email,
+                  firebaseToken: idToken,
+                  displayName: firebaseUser.displayName,
+                  profileImage: firebaseUser.photoURL
+                });
+
+                const { token: newToken, user: userData } = response.data;
+                localStorage.setItem('token', newToken);
+                localStorage.setItem('user', JSON.stringify(userData));
+                setUser(userData);
+              } catch (loginError) {
+                console.error('Failed to refresh token:', loginError);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setUser(null);
+              }
+            }
+          } else {
+            // No token but Firebase user exists, get new token
+            const idToken = await firebaseUser.getIdToken();
+
+            try {
+              const response = await authAPI.login({
+                email: firebaseUser.email,
+                firebaseToken: idToken,
+                displayName: firebaseUser.displayName,
+                profileImage: firebaseUser.photoURL
+              });
+
+              const { token: newToken, user: userData } = response.data;
+              localStorage.setItem('token', newToken);
+              localStorage.setItem('user', JSON.stringify(userData));
+              setUser(userData);
+            } catch (loginError) {
+              console.error('Failed to get token:', loginError);
+              setUser(null);
+            }
+          }
+        } else {
+          // User is signed out from Firebase
+          const token = localStorage.getItem('token');
+          const storedUser = localStorage.getItem('user');
+
+          if (token && storedUser) {
+            // Check if this is a regular email/password user (not Google)
+            try {
+              const res = await authAPI.getMe();
+              setUser(res.data);
+              localStorage.setItem('user', JSON.stringify(res.data));
+            } catch (error) {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              setUser(null);
+            }
+          } else {
+            setUser(null);
+          }
+        }
+      } catch (error) {
+        console.error('Auth state change error:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
   }, []);
 
   const login = async (email, password) => {
     try {
       const response = await authAPI.login({ email, password });
       const { token, user: userData } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed'
       };
     }
   };
 
   const register = async (email, password, displayName, profileImage) => {
     try {
-      const response = await authAPI.register({ 
-        email, 
-        password, 
-        displayName, 
-        profileImage 
+      const response = await authAPI.register({
+        email,
+        password,
+        displayName,
+        profileImage
       });
       const { token, user: userData } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Registration failed'
       };
     }
   };
@@ -89,29 +159,35 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
-      
+
       // Send token to backend for verification
       // Backend should handle Firebase token verification
-      const response = await authAPI.login({ 
+      const response = await authAPI.login({
         email: result.user.email,
-        firebaseToken: idToken 
+        firebaseToken: idToken
       });
-      
+
       const { token, user: userData } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
-      
+
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.message || 'Social login failed' 
+      return {
+        success: false,
+        message: error.message || 'Social login failed'
       };
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Sign out from Firebase if user was logged in with Google
+      await auth.signOut();
+    } catch (error) {
+      console.error('Firebase signout error:', error);
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
@@ -123,14 +199,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      register, 
-      logout, 
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
+      logout,
       socialLogin,
-      updateUser 
+      updateUser
     }}>
       {children}
     </AuthContext.Provider>
