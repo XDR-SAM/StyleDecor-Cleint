@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          localStorage.setItem('skipLogoutUntil', String(Date.now() + 5 * 60 * 1000));
           // User is signed in with Firebase (Google login)
           const token = localStorage.getItem('token');
 
@@ -159,7 +158,6 @@ export const AuthProvider = ({ children }) => {
   const socialLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      localStorage.setItem('skipLogoutUntil', String(Date.now() + 5 * 60 * 1000));
       const idToken = await result.user.getIdToken();
 
       // Send token to backend for verification
@@ -192,7 +190,6 @@ export const AuthProvider = ({ children }) => {
     }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('skipLogoutUntil');
     setUser(null);
   };
 

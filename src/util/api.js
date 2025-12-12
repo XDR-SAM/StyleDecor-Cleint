@@ -25,8 +25,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const skipUntilRaw = localStorage.getItem('skipLogoutUntil');
-    const inGracePeriod = skipUntilRaw ? Date.now() < Number(skipUntilRaw) : false;
+    // Don't auto-logout during payment flow
+    // This prevents first-time Google users from being logged out after payment
     const isPaymentRelated = error.config?.url?.includes('/api/payments/') ||
       error.config?.url?.includes('/api/bookings/my-bookings');
     const currentPath = window.location.pathname;
@@ -34,10 +34,7 @@ api.interceptors.response.use(
       currentPath.includes('/cancelled') ||
       currentPath.includes('/payment/');
 
-    if (inGracePeriod) {
-      return Promise.reject(error);
-    }
-
+    // Skip auto-logout if on payment pages or making payment-related API calls
     if ((error.response?.status === 401 || error.response?.status === 403) &&
       !isPaymentRelated && !isOnPaymentPage) {
       localStorage.removeItem('token');
