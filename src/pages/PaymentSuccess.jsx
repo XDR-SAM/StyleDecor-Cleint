@@ -23,7 +23,9 @@ const PaymentSuccess = () => {
     onError: (error) => {
       // If token is missing/expired, we still show success messaging but inform the user.
       if (error.response?.status === 401 || error.response?.status === 403) {
-        toast.error('Please log in to sync your payment with your bookings.');
+        // Don't show error toast - payment was successful, just verification failed
+        // The user will see a message in the UI below
+        console.log('Payment verification skipped due to auth - payment was still successful');
       } else {
         toast.error(error.response?.data?.message || 'Unable to verify payment');
       }
@@ -57,7 +59,9 @@ const PaymentSuccess = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-6">Verifying your payment, please wait...</p>
         ) : verifyMutation.isError ? (
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {verifyMutation.error?.response?.data?.message || 'Verification failed. Please log in and retry from dashboard.'}
+            Your payment was successful! {verifyMutation.error?.response?.status === 401 || verifyMutation.error?.response?.status === 403
+              ? 'Your booking will be automatically synced. Please refresh your dashboard to see the updated status.'
+              : 'There was an issue verifying the payment. Please contact support if your booking doesn\'t appear in your dashboard.'}
           </p>
         ) : (
           <p className="text-gray-600 dark:text-gray-400 mb-6">

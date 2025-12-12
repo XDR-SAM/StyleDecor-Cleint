@@ -25,7 +25,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    // Don't auto-logout on payment verification failures
+    // This prevents first-time Google users from being logged out after payment
+    const isPaymentVerification = error.config?.url?.includes('/api/payments/verify-session');
+
+    if ((error.response?.status === 401 || error.response?.status === 403) && !isPaymentVerification) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
