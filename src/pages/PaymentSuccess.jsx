@@ -4,11 +4,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { paymentsAPI } from '../util/api';
+import { useAuth } from '../authcontext/authcontext';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { loading: authLoading } = useAuth();
 
   const sessionId = searchParams.get('session_id');
   const bookingId = searchParams.get('booking_id');
@@ -33,10 +35,12 @@ const PaymentSuccess = () => {
   });
 
   useEffect(() => {
-    if (sessionId && bookingId) {
+    // Wait for auth to be ready before verifying payment
+    // This prevents race condition where token hasn't been refreshed yet
+    if (!authLoading && sessionId && bookingId) {
       verifyMutation.mutate();
     }
-  }, [sessionId, bookingId]);
+  }, [authLoading, sessionId, bookingId]);
 
   const missingParams = !sessionId || !bookingId;
 
