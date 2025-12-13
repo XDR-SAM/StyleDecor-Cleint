@@ -45,31 +45,69 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Service Demand Chart */}
+      {/* Service Demand Histogram */}
       <div className="card-modern p-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Top Service Demand</h2>
         {serviceDemand.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">No data available</p>
         ) : (
-          <div className="space-y-4">
-            {serviceDemand.map((item, index) => {
-              const maxCount = serviceDemand[0]?.count || 1;
-              const percentage = (item.count / maxCount) * 100;
-              return (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">{item._id}</span>
-                    <span className="badge bg-gradient-to-r from-orange-500 to-red-500 text-white border-0">{item.count} bookings</span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
-                    <div
-                      className="bg-gradient-to-r from-orange-500 to-red-500 h-4 rounded-full transition-all"
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="w-full">
+            {/* Histogram Container */}
+            <div className="flex items-end justify-around gap-4 h-80 border-b-2 border-l-2 border-gray-300 dark:border-gray-600 p-4 relative">
+              {/* Y-axis labels */}
+              <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 dark:text-gray-400 pr-2">
+                {[...Array(6)].map((_, i) => {
+                  const maxCount = Math.max(...serviceDemand.map(item => item.count));
+                  const value = Math.round((maxCount * (5 - i)) / 5);
+                  return (
+                    <span key={i} className="text-right w-12">
+                      {value}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Histogram Bars */}
+              <div className="flex items-end justify-around gap-3 sm:gap-4 md:gap-6 h-full w-full ml-14">
+                {serviceDemand.map((item, index) => {
+                  const maxCount = Math.max(...serviceDemand.map(item => item.count));
+                  const heightPercentage = (item.count / maxCount) * 100;
+
+                  return (
+                    <div key={index} className="flex flex-col items-center justify-end flex-1 min-w-0 h-full group">
+                      {/* Bar */}
+                      <div className="relative w-full flex flex-col items-center justify-end h-full">
+                        {/* Count label on hover */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-2 py-1 rounded text-xs font-semibold whitespace-nowrap">
+                          {item.count} bookings
+                        </div>
+
+                        {/* Histogram bar */}
+                        <div
+                          className="w-full bg-gradient-to-t from-orange-500 to-red-500 rounded-t-lg transition-all duration-300 hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-xl min-h-[20px]"
+                          style={{ height: `${heightPercentage}%` }}
+                        ></div>
+                      </div>
+
+                      {/* Service name label */}
+                      <div className="mt-3 text-center w-full">
+                        <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" title={item._id}>
+                          {item._id}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {item.count}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* X-axis label */}
+            <div className="text-center mt-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Services</p>
+            </div>
           </div>
         )}
       </div>
