@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../authcontext/authcontext';
 import toast from 'react-hot-toast';
@@ -12,7 +12,11 @@ const Login = () => {
   });
   const { login, socialLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
+
+  // Get the page they were trying to access, or default to homepage
+  const from = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +26,7 @@ const Login = () => {
 
     if (result.success) {
       toast.success('Login successful!');
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } else {
       toast.error(result.message);
     }
@@ -35,7 +39,7 @@ const Login = () => {
     const result = await socialLogin();
     if (result.success) {
       toast.success('Login successful!');
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } else {
       toast.error(result.message);
     }
