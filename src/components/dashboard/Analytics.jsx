@@ -51,10 +51,10 @@ const Analytics = () => {
         {serviceDemand.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">No data available</p>
         ) : (
-          <div className="w-full">
+          <div className="w-full overflow-x-auto">
             {/* Histogram Container */}
-            <div className="w-full">
-              <div className="flex items-end gap-2 sm:gap-3 md:gap-4 h-48 sm:h-56 md:h-64 border-b-2 border-l-2 border-gray-300 dark:border-gray-600 p-2 sm:p-4 pl-10 sm:pl-12 relative">
+            <div className="min-w-[500px] w-full">
+              <div className="flex items-end gap-2 h-48 sm:h-56 md:h-64 border-b-2 border-l-2 border-gray-300 dark:border-gray-600 p-2 sm:p-4 relative">
                 {/* Y-axis labels */}
                 <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 pr-1">
                   {[...Array(6)].map((_, i) => {
@@ -69,38 +69,40 @@ const Analytics = () => {
                 </div>
 
                 {/* Histogram Bars */}
-                {serviceDemand.map((item, index) => {
-                  const maxCount = Math.max(...serviceDemand.map(item => item.count));
-                  const heightPercentage = (item.count / maxCount) * 100;
+                <div className="flex items-end justify-around gap-2 sm:gap-3 md:gap-4 h-full w-full ml-10 sm:ml-12">
+                  {serviceDemand.map((item, index) => {
+                    const maxCount = Math.max(...serviceDemand.map(item => item.count));
+                    const heightPercentage = (item.count / maxCount) * 100;
 
-                  return (
-                    <div key={index} className="flex flex-col items-center justify-end flex-1 h-full group">
-                      {/* Bar */}
-                      <div className="relative w-full flex flex-col items-center justify-end h-full">
-                        {/* Count label on hover */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-1.5 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap absolute bottom-full z-10">
-                          {item.count}
+                    return (
+                      <div key={index} className="flex flex-col items-center justify-end flex-1 min-w-[40px] max-w-[80px] h-full group">
+                        {/* Bar */}
+                        <div className="relative w-full flex flex-col items-center justify-end h-full">
+                          {/* Count label on hover */}
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 px-1.5 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap absolute bottom-full z-10">
+                            {item.count}
+                          </div>
+
+                          {/* Histogram bar */}
+                          <div
+                            className="w-full bg-gradient-to-t from-orange-500 to-red-500 rounded-t-md transition-all duration-300 hover:from-orange-600 hover:to-red-600 shadow-md hover:shadow-lg min-h-[10px]"
+                            style={{ height: `${heightPercentage}%` }}
+                          ></div>
                         </div>
 
-                        {/* Histogram bar */}
-                        <div
-                          className="w-full bg-gradient-to-t from-orange-500 to-red-500 rounded-t-md transition-all duration-300 hover:from-orange-600 hover:to-red-600 shadow-md hover:shadow-lg min-h-[10px]"
-                          style={{ height: `${heightPercentage}%` }}
-                        ></div>
+                        {/* Service name label */}
+                        <div className="mt-2 text-center w-full">
+                          <p className="text-[10px] sm:text-xs font-semibold text-gray-800 dark:text-gray-200 truncate leading-tight" title={item._id}>
+                            {item._id.length > 10 ? item._id.substring(0, 10) + '...' : item._id}
+                          </p>
+                          <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                            {item.count}
+                          </p>
+                        </div>
                       </div>
-
-                      {/* Service name label */}
-                      <div className="mt-2 text-center w-full">
-                        <p className="text-[10px] sm:text-xs font-semibold text-gray-800 dark:text-gray-200 truncate leading-tight" title={item._id}>
-                          {item._id.length > 10 ? item._id.substring(0, 10) + '...' : item._id}
-                        </p>
-                        <p className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                          {item.count}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
 
               {/* X-axis label */}
@@ -116,3 +118,4 @@ const Analytics = () => {
 };
 
 export default Analytics;
+
