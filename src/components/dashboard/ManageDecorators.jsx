@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersAPI, decoratorsAPI } from '../../util/api';
 import Loading from '../Loading';
+import ConfirmationModal from '../ConfirmationModal';
 import toast from 'react-hot-toast';
 import { FaSearch, FaUserShield, FaUser, FaToggleOn, FaToggleOff, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
@@ -17,6 +18,7 @@ const ManageDecorators = () => {
     rating: '',
     experience: '',
   });
+  const [demoteModal, setDemoteModal] = useState({ isOpen: false, user: null });
 
   // Debounce search query to prevent re-rendering on every keystroke
   useEffect(() => {
@@ -40,6 +42,7 @@ const ManageDecorators = () => {
       queryClient.invalidateQueries(['users']);
       queryClient.invalidateQueries(['decorators']);
       setExpandedUser(null);
+      setDemoteModal({ isOpen: false, user: null });
       setDecoratorForm({ specialty: '', rating: '', experience: '' });
     },
     onError: (error) => {
@@ -64,10 +67,8 @@ const ManageDecorators = () => {
 
   const handleToggleRole = (user) => {
     if (user.role === 'decorator') {
-      // Demote to user
-      if (confirm(`Demote ${user.displayName} from decorator to user?`)) {
-        toggleRoleMutation.mutate({ email: user.email, data: {} });
-      }
+      // Demote to user - show confirmation modal
+      setDemoteModal({ isOpen: true, user });
     } else {
       // Show form to promote to decorator
       setExpandedUser(user.email);
@@ -504,6 +505,23 @@ const ManageDecorators = () => {
           <p className="text-xl text-gray-500 dark:text-gray-400">No users found</p>
         </div>
       )}
+
+      {/* Demote Decorator Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={demoteModal.isOpen}
+        onClose={() => setDemoteModal({ isOpen: false, user: null })}
+        onConfirm={() => {
+          if (demoteModal.user) {
+            toggleRoleMutation.mutate({ email: demoteModal.user.email, data: {} });
+          }
+        }}
+        title="Demote Decorator"
+        message={`Are you sure you want to demote ${demoteModal.user?.displayName || 'this user'} from decorator to regular user? They will lose their decorator privileges and access to the decorator dashboard.`}
+        confirmText="Yes, Demote to User"
+        cancelText="No, Keep as Decorator"
+        confirmButtonClass="btn-warning"
+        isLoading={toggleRoleMutation.isPending}
+      />
     </div>
   );
 };

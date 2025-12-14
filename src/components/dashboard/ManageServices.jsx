@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { servicesAPI, uploadAPI } from '../../util/api';
 import Loading from '../Loading';
 import Modal from '../Modal';
+import ConfirmationModal from '../ConfirmationModal';
 import toast from 'react-hot-toast';
 import { FaEdit, FaTrash, FaPlus, FaUpload } from 'react-icons/fa';
 
@@ -10,6 +11,7 @@ const ManageServices = () => {
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, serviceId: null, serviceName: '' });
   const [formData, setFormData] = useState({
     service_name: '',
     cost: '',
@@ -56,6 +58,7 @@ const ManageServices = () => {
     onSuccess: () => {
       toast.success('Service deleted successfully');
       queryClient.invalidateQueries(['services']);
+      setDeleteModal({ isOpen: false, serviceId: null, serviceName: '' });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to delete service');
@@ -191,9 +194,11 @@ const ManageServices = () => {
                     <button
                       className="btn btn-sm btn-error"
                       onClick={() => {
-                        if (confirm('Are you sure you want to delete this service?')) {
-                          deleteMutation.mutate(service._id);
-                        }
+                        setDeleteModal({
+                          isOpen: true,
+                          serviceId: service._id,
+                          serviceName: service.service_name
+                        });
                       }}
                     >
                       <FaTrash />
@@ -237,9 +242,11 @@ const ManageServices = () => {
               <button
                 className="btn btn-sm btn-error flex-1"
                 onClick={() => {
-                  if (confirm('Are you sure you want to delete this service?')) {
-                    deleteMutation.mutate(service._id);
-                  }
+                  setDeleteModal({
+                    isOpen: true,
+                    serviceId: service._id,
+                    serviceName: service.service_name
+                  });
                 }}
               >
                 <FaTrash className="mr-1" /> Delete
@@ -391,6 +398,23 @@ const ManageServices = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Service Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, serviceId: null, serviceName: '' })}
+        onConfirm={() => {
+          if (deleteModal.serviceId) {
+            deleteMutation.mutate(deleteModal.serviceId);
+          }
+        }}
+        title="Delete Service"
+        message={`Are you sure you want to delete "${deleteModal.serviceName}"? This action cannot be undone and will remove the service from your platform.`}
+        confirmText="Yes, Delete Service"
+        cancelText="No, Keep Service"
+        confirmButtonClass="btn-error"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 };

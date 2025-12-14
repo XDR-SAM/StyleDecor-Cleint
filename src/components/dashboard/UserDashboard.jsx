@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../authcontext/authcontext';
 import { bookingsAPI, paymentsAPI } from '../../util/api';
 import Loading from '../Loading';
+import ConfirmationModal from '../ConfirmationModal';
 import toast from 'react-hot-toast';
 import { FaCalendar, FaMapMarkerAlt, FaMoneyBillWave, FaTimes, FaUser, FaBook, FaCreditCard } from 'react-icons/fa';
 
@@ -12,6 +13,7 @@ const UserDashboard = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('bookings');
+  const [cancelModal, setCancelModal] = useState({ isOpen: false, bookingId: null, serviceName: '' });
 
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
     queryKey: ['myBookings'],
@@ -222,11 +224,11 @@ const UserDashboard = () => {
                           whileTap={{ scale: 0.95 }}
                           className="btn btn-sm btn-error"
                           onClick={() => {
-                            if (
-                              confirm('Are you sure you want to cancel this booking?')
-                            ) {
-                              cancelBookingMutation.mutate(booking._id);
-                            }
+                            setCancelModal({
+                              isOpen: true,
+                              bookingId: booking._id,
+                              serviceName: booking.serviceName
+                            });
                           }}
                           disabled={cancelBookingMutation.isPending}
                         >
@@ -343,6 +345,24 @@ const UserDashboard = () => {
           )}
         </motion.div>
       )}
+
+      {/* Cancel Booking Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={cancelModal.isOpen}
+        onClose={() => setCancelModal({ isOpen: false, bookingId: null, serviceName: '' })}
+        onConfirm={() => {
+          if (cancelModal.bookingId) {
+            cancelBookingMutation.mutate(cancelModal.bookingId);
+            setCancelModal({ isOpen: false, bookingId: null, serviceName: '' });
+          }
+        }}
+        title="Cancel Booking"
+        message={`Are you sure you want to cancel your booking for "${cancelModal.serviceName}"? This action cannot be undone.`}
+        confirmText="Yes, Cancel Booking"
+        cancelText="No, Keep Booking"
+        confirmButtonClass="btn-error"
+        isLoading={cancelBookingMutation.isPending}
+      />
     </div>
   );
 };
