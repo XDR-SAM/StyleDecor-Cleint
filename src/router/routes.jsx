@@ -4,6 +4,9 @@ import Layout from '../components/Layout';
 import Home from '../pages/Home';
 import Services from '../pages/Services';
 import ServiceDetails from '../pages/ServiceDetails';
+import About from '../pages/About';
+import Contact from '../pages/Contact';
+import ServiceCoverage from '../pages/ServiceCoverage';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
@@ -29,6 +32,18 @@ const router = createBrowserRouter([
       {
         path: 'services/:id',
         element: <ServiceDetails />,
+      },
+      {
+        path: 'about',
+        element: <About />,
+      },
+      {
+        path: 'contact',
+        element: <Contact />,
+      },
+      {
+        path: 'service-coverage',
+        element: <ServiceCoverage />,
       },
       {
         path: 'login',
