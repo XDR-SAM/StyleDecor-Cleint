@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { bookingsAPI } from '../../util/api';
+import { bookingsAPI, decoratorsAPI } from '../../util/api';
 import Loading from '../Loading';
 import toast from 'react-hot-toast';
-import { FaCalendar, FaMapMarkerAlt, FaCheck, FaUser, FaClipboardList } from 'react-icons/fa';
+import { FaCalendar, FaMapMarkerAlt, FaCheck, FaUser, FaClipboardList, FaDollarSign, FaChartLine } from 'react-icons/fa';
 
 const DecoratorDashboard = () => {
   const queryClient = useQueryClient();
@@ -15,11 +15,17 @@ const DecoratorDashboard = () => {
     queryFn: () => bookingsAPI.getMyAssignments(),
   });
 
+  const { data: earningsData, isLoading: earningsLoading } = useQuery({
+    queryKey: ['decoratorEarnings'],
+    queryFn: () => decoratorsAPI.getEarnings(),
+  });
+
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }) => bookingsAPI.updateStatus(id, status),
     onSuccess: () => {
       toast.success('Status updated successfully');
       queryClient.invalidateQueries(['myAssignments']);
+      queryClient.invalidateQueries(['decoratorEarnings']);
       setSelectedBooking(null);
     },
     onError: (error) => {
@@ -58,9 +64,15 @@ const DecoratorDashboard = () => {
     return statusColors[status] || 'badge-ghost';
   };
 
-  if (isLoading) {
+  if (isLoading || earningsLoading) {
     return <Loading />;
   }
+
+  const earnings = earningsData?.data || {
+    totalEarnings: 0,
+    completedProjectsCount: 0,
+    commissionRate: 0.4
+  };
 
   return (
     <div className="space-y-8">
@@ -71,6 +83,41 @@ const DecoratorDashboard = () => {
       >
         <h1 className="text-4xl md:text-5xl font-bold mb-2 text-gray-900 dark:text-white">Decorator Dashboard</h1>
         <p className="text-gray-600 dark:text-gray-400">Manage your assigned projects</p>
+      </motion.div>
+
+      {/* Earnings Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="card-modern p-6 bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-900 border-2 border-orange-200 dark:border-orange-800"
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <FaDollarSign className="text-3xl text-orange-500" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Total Earnings</h2>
+            </div>
+            <p className="text-4xl md:text-5xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+              ৳{earnings.totalEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              From {earnings.completedProjectsCount} completed {earnings.completedProjectsCount === 1 ? 'project' : 'projects'}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+              Commission Rate: {(earnings.commissionRate * 100).toFixed(0)}% per completed project
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+              <FaChartLine className="text-orange-500" />
+              <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                {earnings.completedProjectsCount}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Completed Projects</p>
+          </div>
+        </div>
       </motion.div>
 
       {bookings.length === 0 ? (

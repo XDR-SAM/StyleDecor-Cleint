@@ -93,6 +93,7 @@ export const decoratorsAPI = {
   getAll: (params) => api.get('/api/decorators', { params }),
   makeDecorator: (email, data) => api.patch(`/api/users/${email}/make-decorator`, data),
   toggleStatus: (email) => api.patch(`/api/decorators/${email}/toggle-status`),
+  getEarnings: () => api.get('/api/decorators/earnings'),
 };
 
 // Analytics APIs

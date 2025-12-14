@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 
 // ============ Middleware ============
 app.use(cors({
-  origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174', 'https://magical-dusk-71097f.netlify.app' ,'https://style-decor-sami.vercel.app'],
+  origin: [process.env.FRONTEND_URL,'https://style-decor-sami.vercel.app'],
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -833,6 +833,55 @@ app.get('/api/bookings/my-assignments', verifyToken, verifyDecorator, async (req
   }
 });
 
+// Get Decorator Earnings (40% of completed paid projects)
+app.get('/api/decorators/earnings', verifyToken, verifyDecorator, async (req, res) => {
+  try {
+    await initializeDatabase();
+    const bookingsCollection = getCollection('bookings');
+    
+    // Find all completed and paid bookings assigned to this decorator
+    const completedBookings = await bookingsCollection
+      .find({
+        assignedDecorator: req.user.email,
+        status: 'completed',
+        $or: [
+          { isPaid: true },
+          { paymentStatus: 'paid' }
+        ]
+      })
+      .toArray();
+
+    // Calculate total earnings (40% of each completed project)
+    const DECORATOR_COMMISSION_RATE = 0.4; // 40%
+    let totalEarnings = 0;
+    let completedProjectsCount = 0;
+    const earningsBreakdown = [];
+
+    completedBookings.forEach(booking => {
+      const projectEarning = booking.serviceCost * DECORATOR_COMMISSION_RATE;
+      totalEarnings += projectEarning;
+      completedProjectsCount++;
+      earningsBreakdown.push({
+        bookingId: booking._id,
+        serviceName: booking.serviceName,
+        projectCost: booking.serviceCost,
+        earning: projectEarning,
+        completedAt: booking.updatedAt || booking.createdAt
+      });
+    });
+
+    res.json({
+      totalEarnings: parseFloat(totalEarnings.toFixed(2)),
+      completedProjectsCount,
+      earningsBreakdown: earningsBreakdown.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)),
+      commissionRate: DECORATOR_COMMISSION_RATE
+    });
+  } catch (error) {
+    console.error('Get decorator earnings error:', error);
+    res.status(500).json({ message: 'Failed to fetch earnings' });
+  }
+});
+
 // ==================== PAYMENT ROUTES ====================
 
 // Create Payment Intent (legacy card form flow)
@@ -914,7 +963,7 @@ app.post('/api/payments/create-checkout-session', verifyToken, async (req, res) 
     const amountInUSD = (amountInBDT / 110).toFixed(2);
     const amountInCents = Math.round(parseFloat(amountInUSD) * 100);
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://style-decor-sami.vercel.app';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
