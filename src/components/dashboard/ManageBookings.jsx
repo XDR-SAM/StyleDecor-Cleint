@@ -9,6 +9,8 @@ const ManageBookings = () => {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+  const [sortField, setSortField] = useState('date'); // 'date' | 'status'
+  const [sortDirection, setSortDirection] = useState('desc'); // 'asc' | 'desc'
 
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
     queryKey: ['bookings', 'admin', { page, status: statusFilter }],
@@ -62,30 +64,68 @@ const ManageBookings = () => {
     return statusColors[status] || 'badge-ghost';
   };
 
+  const sortedBookings = [...bookings].sort((a, b) => {
+    let compare = 0;
+    if (sortField === 'date') {
+      const aDate = new Date(a.bookingDate).getTime();
+      const bDate = new Date(b.bookingDate).getTime();
+      compare = aDate - bDate;
+    } else if (sortField === 'status') {
+      compare = a.status.localeCompare(b.status);
+    }
+    return sortDirection === 'asc' ? compare : -compare;
+  });
+
   if (bookingsLoading) {
     return <Loading />;
   }
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Bookings</h2>
-        <select
-          className="select select-bordered w-full sm:w-auto min-w-[200px]"
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="assigned">Assigned</option>
-          <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Bookings</h2>
+          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+            <select
+              className="select select-bordered flex-1 min-w-[180px]"
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="assigned">Assigned</option>
+              <option value="planning">Planning</option>
+              <option value="materials-prepared">Materials Prepared</option>
+              <option value="on-the-way">On the Way</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+
+            <div className="flex flex-1 sm:flex-none gap-2">
+              <select
+                className="select select-bordered flex-1 min-w-[150px]"
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value)}
+              >
+                <option value="date">Sort by Date</option>
+                <option value="status">Sort by Status</option>
+              </select>
+              <select
+                className="select select-bordered flex-1 min-w-[120px]"
+                value={sortDirection}
+                onChange={(e) => setSortDirection(e.target.value)}
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Desktop Table View */}
@@ -105,7 +145,7 @@ const ManageBookings = () => {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((booking) => (
+            {sortedBookings.map((booking) => (
               <tr key={booking._id}>
                 <td className="font-semibold">{booking.serviceName}</td>
                 <td>{booking.userName}</td>
@@ -192,7 +232,7 @@ const ManageBookings = () => {
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
-        {bookings.map((booking) => (
+        {sortedBookings.map((booking) => (
           <div key={booking._id} className="card-modern p-4">
             <div className="space-y-3">
               <div>

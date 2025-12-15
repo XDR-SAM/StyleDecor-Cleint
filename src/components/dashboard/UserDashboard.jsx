@@ -14,6 +14,9 @@ const UserDashboard = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('bookings');
   const [cancelModal, setCancelModal] = useState({ isOpen: false, bookingId: null, serviceName: '' });
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortField, setSortField] = useState('date'); // 'date' | 'status'
+  const [sortDirection, setSortDirection] = useState('desc'); // 'asc' | 'desc'
 
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
     queryKey: ['myBookings'],
@@ -38,6 +41,19 @@ const UserDashboard = () => {
 
   const bookings = bookingsData?.data?.bookings || [];
   const payments = paymentsData?.data?.payments || [];
+  const filteredAndSortedBookings = [...bookings]
+    .filter((booking) => !statusFilter || booking.status === statusFilter)
+    .sort((a, b) => {
+      let compare = 0;
+      if (sortField === 'date') {
+        const aDate = new Date(a.bookingDate).getTime();
+        const bDate = new Date(b.bookingDate).getTime();
+        compare = aDate - bDate;
+      } else if (sortField === 'status') {
+        compare = a.status.localeCompare(b.status);
+      }
+      return sortDirection === 'asc' ? compare : -compare;
+    });
 
   const getStatusBadge = (status) => {
     const statusColors = {
@@ -136,7 +152,7 @@ const UserDashboard = () => {
         >
           {bookingsLoading ? (
             <Loading />
-          ) : bookings.length === 0 ? (
+          ) : filteredAndSortedBookings.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -156,8 +172,47 @@ const UserDashboard = () => {
               </motion.div>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
-              {bookings.map((booking, index) => (
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 card-modern p-4">
+                <div className="font-semibold text-gray-800 dark:text-gray-200">Filter & Sort Bookings</div>
+                <div className="flex flex-wrap gap-3 w-full md:w-auto">
+                  <select
+                    className="select select-bordered flex-1 min-w-[160px]"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="planning">Planning</option>
+                    <option value="materials-prepared">Materials Prepared</option>
+                    <option value="on-the-way">On the Way</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <select
+                    className="select select-bordered flex-1 min-w-[140px]"
+                    value={sortField}
+                    onChange={(e) => setSortField(e.target.value)}
+                  >
+                    <option value="date">Sort by Date</option>
+                    <option value="status">Sort by Status</option>
+                  </select>
+                  <select
+                    className="select select-bordered flex-1 min-w-[120px]"
+                    value={sortDirection}
+                    onChange={(e) => setSortDirection(e.target.value)}
+                  >
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                {filteredAndSortedBookings.map((booking, index) => (
                 <motion.div
                   key={booking._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -238,7 +293,8 @@ const UserDashboard = () => {
                       )}
                   </div>
                 </motion.div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </motion.div>
